@@ -1,5 +1,7 @@
 package fp_chapters
 
+import List.{append, foldLeft, foldRight}
+
 import scala.annotation.tailrec
 
 sealed trait List[+A]
@@ -136,15 +138,117 @@ object List {
     case Nil => z
     case Cons(hd, tl) => foldLeft(tl, f(z, hd))(f)
   }
-}
+
+  /**
+    * Exercise 3.11 (page 41)
+    * Write sum, product, and a function to compute the length of a list using foldLeft
+    */
+
+  val sum: List[Int] => Int = foldLeft(_: List[Int], 0: Int)((a, b) => a + b)
+  val product: List[Int] => Int = foldLeft(_: List[Int], 1: Int)((a, b) => a * b)
+
+  def length2[A](list: List[A]) = foldLeft(list, 0: Int)((a, b) => a + 1)
+
+  /**
+    * Exercise 3.12 (page 41)
+    * Write a function that returns the reverse of a list (given List(1,2,3)
+    * it returns List(3,2,1)). See if you can write it using a fold.
+    */
+
+  def reverse[A](l: List[A]) = List.foldLeft(l, List[A]()) { (a, b) => Cons(b, a) }
 
 
-object ChapterThree extends App {
-  val x: List[Int] = Cons(1, Cons(2, Cons(3, Cons(6, Cons(10, Nil)))))
-  val y: List[Double] = Cons(1, Cons(2, Cons(3, Cons(6, Cons(10, Nil)))))
-  val pred: Int => Boolean = a => a < 4
+  /**
+    * Exercise 3.13 (page 41)
+    * Hard: Can you write foldLeft in terms of foldRight?
+    * How about the other way around? Implementing foldRight via foldLeft is useful because
+    * it lets us implement foldRight tail-recursively, which means it works even for large lists
+    * without overflowing the stack.
+    */
 
 
+  def foldLeftViaRight[A, B](as: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(as, z)((a: A, b: B) => f(b, a))
 
+  def foldRightViaLeft[A, B](as: List[A], z: B)(f: (A, B) => B): B =
+    foldLeft(as, z)((b: B, a: A) => f(a, b))
+
+  /**
+    * Exercise 3.14 (page 41)
+    * Implement append in terms of either foldLeft or foldRight.
+    */
+
+  def append[A](l1: List[A], l2: List[A]): List[A] =
+    foldLeft(l1, l2)((a, b) => Cons(b, a))
+
+  /**
+    * Exercise 3.15 (page 41)
+    * Hard: Write a function that concatenates a list of lists into a single list.
+    * Its runtime should be linear in the total length of all lists. Try to use functions
+    * we have already defined.
+    */
+
+
+  def concat1[A](l1: List[List[A]]): List[A] = l1 match {
+    case Nil => Nil
+    case Cons(a, b) => append(a, concat1(b))
+  }
+
+  def concat2[A](l1: List[List[A]]): List[A] =
+    foldRight(l1, List[A]())(append)
+
+  /**
+    * Exercise 3.16 (page 42)
+    * Write a function that transforms a list of integers by adding 1 to each element.
+    * (Reminder: this should be a pure function that returns a new List!)
+    */
+  //fold left would reverse the list here i.e foldLeft(l, List[Int]())((a, b) => Cons(b + 1, a))
+  def addOne(l: List[Int]): List[Int] =
+    foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
+
+  /**
+    * Exercise 3.17 (page 42)
+    * Write a function that turns each value in a List[Double] into a String.
+    * You can use the expression d.toString to convert some d: Double to a String.
+    */
+
+  def doubleToString(l: List[Double]): List[String] =
+    foldRight(l, List[String]())((a, b) => Cons(a.toString, b))
+
+  /**
+    * Exercise 3.18 (page 43)
+    * Write a function map that generalizes modifying each element in a list while maintaining
+    * the structure of the list. Here is its signature:
+    * def map[A,B](as: List[A])(f: A => B): List[B]
+    */
+
+  def map[A, B](as: List[A])(f: A => B): List[B] =
+    foldRight(as, List[B]())((a, b) => Cons(f(a), b))
+
+
+  /**
+    * Exercise 3.19 (page 43)
+    * Write a function filter that removes elements from a list unless they satisfy a given
+    * predicate. Use it to remove all odd numbers from a List[Int].
+    * def filter[A](as: List[A])(f: A => Boolean): List[A]
+    */
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, List[A]()) { (a, b) =>
+      if (f(a)) Cons(a, b) else b
+    }
+
+  /**
+    * Exercise 3.20 (page 43)
+    * Write a function flatMap that works like map except that the function given will return a list instead
+    * of a single result, and that list should be inserted into the final resulting list. Here is its signature:
+    *
+    * def flatMap[A,B](as: List[A])(f: A => List[B]): List[B]
+    *
+    * For instance, flatMap(List(1,2,3))(i => List(i,i)) should result in List(1,1,2,2,3,3).
+    */
+
+  //  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
+  //    foldRight(as, List[B]())((a, b) => Cons(???, f(a)))
+  //    map(as)( (a: A) => foldRight(???, ???)(???))
 }
 
