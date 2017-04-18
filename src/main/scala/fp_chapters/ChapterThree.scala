@@ -1,6 +1,6 @@
 package fp_chapters
 
-import List.{append, foldLeft, foldRight}
+import List.{tail, _}
 
 import scala.annotation.tailrec
 
@@ -188,14 +188,13 @@ object List {
     * we have already defined.
     */
 
+  //  def concatAlternative[A](l1: List[List[A]]): List[A] = l1 match {
+  //    case Nil => Nil
+  //    case Cons(a, b) => append(a, concat1(b))
+  //  }
 
-  def concat1[A](l1: List[List[A]]): List[A] = l1 match {
-    case Nil => Nil
-    case Cons(a, b) => append(a, concat1(b))
-  }
-
-  def concat2[A](l1: List[List[A]]): List[A] =
-    foldRight(l1, List[A]())(append)
+  def concat[A](l1: List[List[A]]): List[A] =
+  foldRight(l1, List[A]())(append)
 
   /**
     * Exercise 3.16 (page 42)
@@ -204,7 +203,7 @@ object List {
     */
   //fold left would reverse the list here i.e foldLeft(l, List[Int]())((a, b) => Cons(b + 1, a))
   def addOne(l: List[Int]): List[Int] =
-    foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
+  foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
 
   /**
     * Exercise 3.17 (page 42)
@@ -238,7 +237,7 @@ object List {
     }
 
   /**
-    * Exercise 3.20 (page 43)
+    * Exercise 3.20 (page 42)
     * Write a function flatMap that works like map except that the function given will return a list instead
     * of a single result, and that list should be inserted into the final resulting list. Here is its signature:
     *
@@ -247,8 +246,72 @@ object List {
     * For instance, flatMap(List(1,2,3))(i => List(i,i)) should result in List(1,1,2,2,3,3).
     */
 
-  //  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
-  //    foldRight(as, List[B]())((a, b) => Cons(???, f(a)))
-  //    map(as)( (a: A) => foldRight(???, ???)(???))
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    concat(map(as)(f))
+
+  /**
+    * Exercise 3.21 (page 43)
+    * Use flatMap to implement filter.
+    */
+
+  def filterWithFlatMap[A](as: List[A])(f: A => Boolean): List[A] = {
+    flatMap(as)(a => if (f(a)) List(a) else List())
+  }
+
+  /**
+    * Exercise 3.22 (page 43)
+    * Write a function that accepts two lists and constructs a new list by adding corresponding elements.
+    * For example, List(1,2,3) and List(4,5,6) become List(5,7,9).
+    */
+  def addListElements(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+    case (Nil, _) => l1
+    case (_, Nil) => l1
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addListElements(t1, t2))
+  }
+
+  /**
+    * Exercise 3.23 (page 43)
+    * Generalize the function you just wrote so that it’s not specific to integers or addition.
+    * Name your generalized function zipWith.
+    */
+
+  def zipWith[A](l1: List[A], l2: List[A])(f: (A, A) => A): List[A] = (l1, l2) match {
+    case (Nil, _) => l1
+    case (_, Nil) => l1
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
+
+  /**
+    * Exercise 3.24 (page 44)
+    * Hard: As an example, implement hasSubsequence for checking whether a List contains another List
+    * as a subsequence. For instance, List(1,2,3,4) would have List(1,2), List(2,3), and List(4) as subsequences,
+    * among others.
+    * You may have some difficulty finding a concise purely functional implementation that is also efficient.
+    */
+
+  def removeLastElement[A](l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case Cons(_, Nil) => Nil
+    case Cons(h, t) => Cons(h, removeLastElement(t))
+  }
+
+  //TODO improve solution
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+
+    def checkTail(l: List[A]): Boolean = l match {
+      case Nil => false
+      case l => if (l == sub) return true else checkTail(tail(l))
+    }
+
+
+    def check(l: List[A]): Boolean = l match {
+      case Nil => false
+      case l => if (checkTail(l)) true else check(removeLastElement(l))
+    }
+
+    check(sup)
+  }
+
+
 }
 
