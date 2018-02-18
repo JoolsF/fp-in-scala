@@ -194,7 +194,7 @@ object List {
   //  }
 
   def concat[A](l1: List[List[A]]): List[A] =
-  foldRight(l1, List[A]())(append)
+    foldRight(l1, List[A]())(append)
 
   /**
     * Exercise 3.16 (page 42)
@@ -203,7 +203,7 @@ object List {
     */
   //fold left would reverse the list here i.e foldLeft(l, List[Int]())((a, b) => Cons(b + 1, a))
   def addOne(l: List[Int]): List[Int] =
-  foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
+    foldRight(l, List[Int]())((a, b) => Cons(a + 1, b))
 
   /**
     * Exercise 3.17 (page 42)
@@ -311,6 +311,67 @@ object List {
 
     check(sup)
   }
+
+  // Trees
+  sealed trait Tree[+A]
+
+  case class Leaf[A](value: A) extends Tree[A]
+
+  case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
+
+  /**
+    * Exercise 3.25 (page 46)
+    * Write a function size that counts the number of nodes (leaves and branches) in a tree.
+    */
+  def size[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 1
+    case Branch(l, r) => size(l) + size(r)
+  }
+
+  /**
+    * Exercise 3.26 (page 46)
+    * Write a function maximum that returns the maximum element in a Tree[Int].
+    */
+
+  def maximum(t: Tree[Int]): Int = t match {
+    case Leaf(v) => v
+    case Branch(l, r) => maximum(l).max(maximum(r))
+  }
+
+  /**
+    * Exercise 3.27 (page 46)
+    * Write a function depth that returns the maximum path length from the root of a tree to any leaf.
+    */
+  def depth[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 0
+    case Branch(l, r) =>
+      val lDepth = 1 + depth(l)
+      val rDepth = 1 + depth(r)
+      if (lDepth > rDepth) lDepth else rDepth
+  }
+
+  /**
+    * Exercise 3.28 (page 46)
+    * Write a function map, analogous to the method of the same name on List
+    * that modifies each element in a tree with a given function.
+    */
+  def map[A, B](t: Tree[A])(f: A => B): Tree[B] = t match {
+    case Leaf(v) => Leaf(f(v))
+    case Branch(l, r) => Branch(map(l)(f), map(r)(f))
+  }
+
+  /**
+    * Exercise 3.29 (page 47)
+    * Generalize size, maximum, depth, and map, writing a new function fold that
+    * abstracts over their similarities. Reimplement them in terms of this more general function.
+    * Can you draw an analogy between this fold function and the left and right folds for List?
+    */
+
+//    def foldLeftTree[A, B](as: Tree[A], z: B)(f: (B, A) => B): B = as match {
+  //      case Leaf(v) => f(z,v)
+  //      case Branch(l, r) => foldLeftTree(l, z)(f)
+  //    }
 
 
 }
