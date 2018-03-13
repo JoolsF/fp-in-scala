@@ -368,10 +368,23 @@ object List {
     * Can you draw an analogy between this fold function and the left and right folds for List?
     */
 
-//    def foldLeftTree[A, B](as: Tree[A], z: B)(f: (B, A) => B): B = as match {
-  //      case Leaf(v) => f(z,v)
-  //      case Branch(l, r) => foldLeftTree(l, z)(f)
-  //    }
+  def foldTree[A, B](tree: Tree[A])(f: A => B)(g: (B, B) => B): B = {
+
+    def foldTreeInner(t: Tree[A]): B = t match {
+      case Leaf(v) => f(v)
+      case Branch(l, r) => g(foldTreeInner(l), foldTreeInner(r))
+    }
+
+    foldTreeInner(tree)
+  }
+
+  def fSize[A](t: Tree[A]): Int = foldTree(t)(_ => 1)((l, r) => l + r)
+
+  def fMax(t: Tree[Int]): Int = foldTree(t)(identity)((l, r) => l.max(r))
+
+  def fDepth[A](t: Tree[A]): Int = foldTree(t)(_ => 0)((l, r) => if (l > r) 1 + l else 1 + r)
+
+  def fMap[A, B](t: Tree[A])(f: A => B): Tree[B] = foldTree(t)(a => Leaf(f(a)): Tree[B])((l, r) => Branch(l, r))
 
 
 }
