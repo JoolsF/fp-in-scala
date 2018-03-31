@@ -1,6 +1,4 @@
-package fp_chapters
-
-import List.{tail, _}
+package fp_chapters.ch3
 
 import scala.annotation.tailrec
 

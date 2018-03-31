@@ -1,8 +1,8 @@
-package fp_chapters
+package fp_chapters.ch2
 
 import scala.annotation.tailrec
 
-object ChapterTwo_Exercises extends App {
+object ChapterTwoExercises extends App {
 
   /**
     * Exercise 2.2 (page 24)
